@@ -7,19 +7,19 @@ namespace ProductPrice.Forms
 {
     public partial class Form1 : Form
     {
-        public BindingSource bindingSource;
+        private readonly BindingSource _bindingSource;
 
         public Form1()
         {
             InitializeComponent();
-            bindingSource = new BindingSource { DataSource = new List<Product>() };
-            dataGridView1.DataSource = bindingSource;
+            _bindingSource = new BindingSource { DataSource = new List<Product>() };
+            dataGridView1.DataSource = _bindingSource;
         }
 
         internal void AddProduct(Product product)
         {
-            bindingSource.Add(product);
-            bindingSource.ResetBindings(true);
+            _bindingSource.Add(product);
+            _bindingSource.ResetBindings(true);
         }
 
         internal void NewProductButton(bool enable)
@@ -40,7 +40,7 @@ namespace ProductPrice.Forms
 
             if (ans == DialogResult.Yes)
             {
-                bindingSource.RemoveCurrent();
+                _bindingSource.RemoveCurrent();
             }
         }
 
