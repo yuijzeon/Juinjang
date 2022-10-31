@@ -1,6 +1,6 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using ProductPrice.Database;
+using ProductPrice.Database.Entity;
 
 namespace ProductPrice.UnitTests
 {
@@ -10,12 +10,13 @@ namespace ProductPrice.UnitTests
         [Test]
         public void Insert()
         {
-            var toDb = new Product 
+            var toDb = new Product
             {
-                Id   = 1,
+                Id = 1,
                 Name = "Yellow Duck",
-                Price  = 1000
+                Price = 1000
             };
+
             using (var db = new JuinjangContext())
             {
                 db.Products.Add(toDb);
