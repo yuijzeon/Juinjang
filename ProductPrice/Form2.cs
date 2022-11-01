@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
-using ProductPrice.Core;
 
-namespace ProductPrice.Forms
+namespace ProductPrice
 {
     public partial class Form2 : Form
     {
@@ -21,21 +20,17 @@ namespace ProductPrice.Forms
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (!int.TryParse(InputId, out var id))
+            if (!int.TryParse(InputPrice, out var price))
             {
-                MessageBox.Show("產品編號必須為數字", null, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            else if (!int.TryParse(InputPrice, out var price))
-            {
-                MessageBox.Show("產品價格必須為數字", null, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(@"產品價格必須為數字", null, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
             {
-                var ans = MessageBox.Show("確定新增此筆資料?", "確定新增", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                var ans = MessageBox.Show(@"確定新增此筆資料?", @"確定新增", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
                 if (ans == DialogResult.Yes)
                 {
-                    _form1.AddProduct(new Product(id, InputName, price));
+                    _form1.AddProduct(new Product(InputName, price));
                 }
 
                 _form1.NewProductButton(true);

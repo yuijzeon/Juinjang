@@ -1,5 +1,4 @@
-﻿
-namespace ProductPrice.Forms
+﻿namespace ProductPrice
 {
     partial class Form2
     {
@@ -112,7 +111,6 @@ namespace ProductPrice.Forms
             this.Text = "Form2";
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

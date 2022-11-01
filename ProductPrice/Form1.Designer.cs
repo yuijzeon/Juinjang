@@ -1,31 +1,30 @@
-﻿namespace ProductPrice.Forms
+﻿namespace ProductPrice
 {
     partial class Form1
     {
         /// <summary>
-        /// Required designer variable.
+        /// 設計工具所需的變數。
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary>
-        /// Clean up any resources being used.
+        /// 清除任何使用中的資源。
         /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /// <param name="disposing">如果應該處置受控資源則為 true，否則為 false。</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
             {
                 components.Dispose();
             }
-
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
+        #region Windows Form 設計工具產生的程式碼
 
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        /// 此為設計工具支援所需的方法 - 請勿使用程式碼編輯器修改
+        /// 這個方法的內容。
         /// </summary>
         private void InitializeComponent()
         {
@@ -49,6 +48,8 @@
             // 
             // dataGridView
             // 
+            this.dataGridView.AllowUserToAddRows = false;
+            this.dataGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView.Location = new System.Drawing.Point(12, 12);
             this.dataGridView.Name = "dataGridView";
@@ -67,7 +68,7 @@
             this.buttonGoFirst.TabIndex = 1;
             this.buttonGoFirst.Text = "第一筆";
             this.buttonGoFirst.UseVisualStyleBackColor = true;
-            this.buttonGoFirst.Click += new System.EventHandler(this.buttonGoFirst_Click);
+            this.buttonGoFirst.Click += new System.EventHandler(this.buttonMove_Click);
             // 
             // buttonGoPrevious
             // 
@@ -77,7 +78,7 @@
             this.buttonGoPrevious.TabIndex = 1;
             this.buttonGoPrevious.Text = "上一筆";
             this.buttonGoPrevious.UseVisualStyleBackColor = true;
-            this.buttonGoPrevious.Click += new System.EventHandler(this.buttonGoPrevious_Click);
+            this.buttonGoPrevious.Click += new System.EventHandler(this.buttonMove_Click);
             // 
             // buttonGoNext
             // 
@@ -87,7 +88,7 @@
             this.buttonGoNext.TabIndex = 1;
             this.buttonGoNext.Text = "下一筆";
             this.buttonGoNext.UseVisualStyleBackColor = true;
-            this.buttonGoNext.Click += new System.EventHandler(this.buttonGoNext_Click);
+            this.buttonGoNext.Click += new System.EventHandler(this.buttonMove_Click);
             // 
             // buttonGoEnd
             // 
@@ -97,7 +98,7 @@
             this.buttonGoEnd.TabIndex = 1;
             this.buttonGoEnd.Text = "最後一筆";
             this.buttonGoEnd.UseVisualStyleBackColor = true;
-            this.buttonGoEnd.Click += new System.EventHandler(this.buttonGoEnd_Click);
+            this.buttonGoEnd.Click += new System.EventHandler(this.buttonMove_Click);
             // 
             // buttonNewProduct
             // 
@@ -213,7 +214,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
@@ -235,3 +235,4 @@
         private System.Windows.Forms.Label labelProductId;
     }
 }
+
