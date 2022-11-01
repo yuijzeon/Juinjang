@@ -1,5 +1,4 @@
 ﻿using System.Data.Entity;
-using ProductPrice.Database.Entity;
 
 namespace ProductPrice.Database
 {
@@ -10,6 +9,6 @@ namespace ProductPrice.Database
             System.Data.Entity.Database.SetInitializer(new MigrateDatabaseToLatestVersion<JuinjangContext, ContextMigrationConfiguration>(true));
         }
 
-        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductEntity> Products => Set<ProductEntity>();
     }
 }

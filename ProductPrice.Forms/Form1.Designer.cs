@@ -29,113 +29,119 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
-            this.button6 = new System.Windows.Forms.Button();
-            this.button7 = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.dataGridView = new System.Windows.Forms.DataGridView();
+            this.buttonGoFirst = new System.Windows.Forms.Button();
+            this.buttonGoPrevious = new System.Windows.Forms.Button();
+            this.buttonGoNext = new System.Windows.Forms.Button();
+            this.buttonGoEnd = new System.Windows.Forms.Button();
+            this.buttonNewProduct = new System.Windows.Forms.Button();
+            this.buttonUpdateProduct = new System.Windows.Forms.Button();
+            this.buttonDeleteProduct = new System.Windows.Forms.Button();
+            this.textBoxProductName = new System.Windows.Forms.TextBox();
+            this.textBoxProductPrice = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.labelProductId = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).BeginInit();
             this.SuspendLayout();
             // 
-            // dataGridView1
+            // dataGridView
             // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(12, 12);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowHeadersWidth = 82;
-            this.dataGridView1.RowTemplate.Height = 38;
-            this.dataGridView1.Size = new System.Drawing.Size(807, 481);
-            this.dataGridView1.TabIndex = 0;
+            this.dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView.Location = new System.Drawing.Point(12, 12);
+            this.dataGridView.Name = "dataGridView";
+            this.dataGridView.ReadOnly = true;
+            this.dataGridView.RowHeadersWidth = 82;
+            this.dataGridView.RowTemplate.Height = 38;
+            this.dataGridView.Size = new System.Drawing.Size(807, 481);
+            this.dataGridView.TabIndex = 0;
+            this.dataGridView.CurrentCellChanged += new System.EventHandler(this.dataGridView_CurrentCellChanged);
             // 
-            // button1
+            // buttonGoFirst
             // 
-            this.button1.Location = new System.Drawing.Point(99, 605);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(112, 34);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "第一筆";
-            this.button1.UseVisualStyleBackColor = true;
+            this.buttonGoFirst.Location = new System.Drawing.Point(99, 605);
+            this.buttonGoFirst.Name = "buttonGoFirst";
+            this.buttonGoFirst.Size = new System.Drawing.Size(112, 34);
+            this.buttonGoFirst.TabIndex = 1;
+            this.buttonGoFirst.Text = "第一筆";
+            this.buttonGoFirst.UseVisualStyleBackColor = true;
+            this.buttonGoFirst.Click += new System.EventHandler(this.buttonGoFirst_Click);
             // 
-            // button2
+            // buttonGoPrevious
             // 
-            this.button2.Location = new System.Drawing.Point(232, 605);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(119, 34);
-            this.button2.TabIndex = 1;
-            this.button2.Text = "上一筆";
-            this.button2.UseVisualStyleBackColor = true;
+            this.buttonGoPrevious.Location = new System.Drawing.Point(232, 605);
+            this.buttonGoPrevious.Name = "buttonGoPrevious";
+            this.buttonGoPrevious.Size = new System.Drawing.Size(119, 34);
+            this.buttonGoPrevious.TabIndex = 1;
+            this.buttonGoPrevious.Text = "上一筆";
+            this.buttonGoPrevious.UseVisualStyleBackColor = true;
+            this.buttonGoPrevious.Click += new System.EventHandler(this.buttonGoPrevious_Click);
             // 
-            // button3
+            // buttonGoNext
             // 
-            this.button3.Location = new System.Drawing.Point(370, 605);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(119, 34);
-            this.button3.TabIndex = 1;
-            this.button3.Text = "下一筆";
-            this.button3.UseVisualStyleBackColor = true;
+            this.buttonGoNext.Location = new System.Drawing.Point(370, 605);
+            this.buttonGoNext.Name = "buttonGoNext";
+            this.buttonGoNext.Size = new System.Drawing.Size(119, 34);
+            this.buttonGoNext.TabIndex = 1;
+            this.buttonGoNext.Text = "下一筆";
+            this.buttonGoNext.UseVisualStyleBackColor = true;
+            this.buttonGoNext.Click += new System.EventHandler(this.buttonGoNext_Click);
             // 
-            // button4
+            // buttonGoEnd
             // 
-            this.button4.Location = new System.Drawing.Point(517, 605);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(119, 34);
-            this.button4.TabIndex = 1;
-            this.button4.Text = "最後一筆";
-            this.button4.UseVisualStyleBackColor = true;
+            this.buttonGoEnd.Location = new System.Drawing.Point(517, 605);
+            this.buttonGoEnd.Name = "buttonGoEnd";
+            this.buttonGoEnd.Size = new System.Drawing.Size(119, 34);
+            this.buttonGoEnd.TabIndex = 1;
+            this.buttonGoEnd.Text = "最後一筆";
+            this.buttonGoEnd.UseVisualStyleBackColor = true;
+            this.buttonGoEnd.Click += new System.EventHandler(this.buttonGoEnd_Click);
             // 
-            // button5
+            // buttonNewProduct
             // 
-            this.button5.Location = new System.Drawing.Point(907, 373);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(106, 41);
-            this.button5.TabIndex = 1;
-            this.button5.Text = "新增";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
+            this.buttonNewProduct.Location = new System.Drawing.Point(907, 373);
+            this.buttonNewProduct.Name = "buttonNewProduct";
+            this.buttonNewProduct.Size = new System.Drawing.Size(106, 41);
+            this.buttonNewProduct.TabIndex = 1;
+            this.buttonNewProduct.Text = "新增";
+            this.buttonNewProduct.UseVisualStyleBackColor = true;
+            this.buttonNewProduct.Click += new System.EventHandler(this.buttonNewProduct_Click);
             // 
-            // button6
+            // buttonUpdateProduct
             // 
-            this.button6.Location = new System.Drawing.Point(907, 277);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(106, 44);
-            this.button6.TabIndex = 1;
-            this.button6.Text = "更新";
-            this.button6.UseVisualStyleBackColor = true;
-            this.button6.Click += new System.EventHandler(this.button6_Click);
+            this.buttonUpdateProduct.Location = new System.Drawing.Point(907, 277);
+            this.buttonUpdateProduct.Name = "buttonUpdateProduct";
+            this.buttonUpdateProduct.Size = new System.Drawing.Size(106, 44);
+            this.buttonUpdateProduct.TabIndex = 1;
+            this.buttonUpdateProduct.Text = "更新";
+            this.buttonUpdateProduct.UseVisualStyleBackColor = true;
+            this.buttonUpdateProduct.Click += new System.EventHandler(this.buttonUpdateProduct_Click);
             // 
-            // button7
+            // buttonDeleteProduct
             // 
-            this.button7.Location = new System.Drawing.Point(1029, 277);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(106, 44);
-            this.button7.TabIndex = 1;
-            this.button7.Text = "刪除";
-            this.button7.UseVisualStyleBackColor = true;
-            this.button7.Click += new System.EventHandler(this.button7_Click);
+            this.buttonDeleteProduct.Location = new System.Drawing.Point(1029, 277);
+            this.buttonDeleteProduct.Name = "buttonDeleteProduct";
+            this.buttonDeleteProduct.Size = new System.Drawing.Size(106, 44);
+            this.buttonDeleteProduct.TabIndex = 1;
+            this.buttonDeleteProduct.Text = "刪除";
+            this.buttonDeleteProduct.UseVisualStyleBackColor = true;
+            this.buttonDeleteProduct.Click += new System.EventHandler(this.buttonDeleteProduct_Click);
             // 
-            // textBox1
+            // textBoxProductName
             // 
-            this.textBox1.Location = new System.Drawing.Point(960, 183);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(127, 36);
-            this.textBox1.TabIndex = 2;
+            this.textBoxProductName.Location = new System.Drawing.Point(960, 183);
+            this.textBoxProductName.Name = "textBoxProductName";
+            this.textBoxProductName.Size = new System.Drawing.Size(127, 36);
+            this.textBoxProductName.TabIndex = 2;
             // 
-            // textBox2
+            // textBoxProductPrice
             // 
-            this.textBox2.Location = new System.Drawing.Point(960, 108);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(127, 36);
-            this.textBox2.TabIndex = 3;
+            this.textBoxProductPrice.Location = new System.Drawing.Point(960, 108);
+            this.textBoxProductPrice.Name = "textBoxProductPrice";
+            this.textBoxProductPrice.Size = new System.Drawing.Size(127, 36);
+            this.textBoxProductPrice.TabIndex = 3;
             // 
             // label1
             // 
@@ -173,38 +179,38 @@
             this.label4.TabIndex = 4;
             this.label4.Text = "產品編號:";
             // 
-            // label5
+            // labelProductId
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(997, 55);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(64, 24);
-            this.label5.TabIndex = 4;
-            this.label5.Text = "label1";
+            this.labelProductId.AutoSize = true;
+            this.labelProductId.Location = new System.Drawing.Point(997, 55);
+            this.labelProductId.Name = "labelProductId";
+            this.labelProductId.Size = new System.Drawing.Size(64, 24);
+            this.labelProductId.TabIndex = 4;
+            this.labelProductId.Text = "label1";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1276, 744);
-            this.Controls.Add(this.label5);
+            this.Controls.Add(this.labelProductId);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBox2);
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.button7);
-            this.Controls.Add(this.button6);
-            this.Controls.Add(this.button5);
-            this.Controls.Add(this.button4);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.dataGridView1);
+            this.Controls.Add(this.textBoxProductPrice);
+            this.Controls.Add(this.textBoxProductName);
+            this.Controls.Add(this.buttonDeleteProduct);
+            this.Controls.Add(this.buttonUpdateProduct);
+            this.Controls.Add(this.buttonNewProduct);
+            this.Controls.Add(this.buttonGoEnd);
+            this.Controls.Add(this.buttonGoNext);
+            this.Controls.Add(this.buttonGoPrevious);
+            this.Controls.Add(this.buttonGoFirst);
+            this.Controls.Add(this.dataGridView);
             this.Name = "Form1";
             this.Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -212,20 +218,20 @@
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button5;
-        private System.Windows.Forms.Button button6;
-        private System.Windows.Forms.Button button7;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.DataGridView dataGridView;
+        private System.Windows.Forms.Button buttonGoFirst;
+        private System.Windows.Forms.Button buttonGoPrevious;
+        private System.Windows.Forms.Button buttonGoNext;
+        private System.Windows.Forms.Button buttonGoEnd;
+        private System.Windows.Forms.Button buttonNewProduct;
+        private System.Windows.Forms.Button buttonUpdateProduct;
+        private System.Windows.Forms.Button buttonDeleteProduct;
+        private System.Windows.Forms.TextBox textBoxProductName;
+        private System.Windows.Forms.TextBox textBoxProductPrice;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label labelProductId;
     }
 }

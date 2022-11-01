@@ -61,16 +61,20 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="ContextMigrationConfiguration.cs" />
-        <Compile Include="Entity\Product.cs" />
         <Compile Include="JuinjangContext.cs" />
+        <Compile Include="ProductEntity.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="Repository.cs" />
     </ItemGroup>
     <ItemGroup>
         <None Include="App.config" />
         <None Include="packages.config" />
     </ItemGroup>
     <ItemGroup>
-      <Folder Include="Repository" />
+      <ProjectReference Include="..\ProductPrice.Core\ProductPrice.Core.csproj">
+        <Project>{5e9defcc-119c-4bb6-ba0f-0234dfdd02b1}</Project>
+        <Name>ProductPrice.Core</Name>
+      </ProjectReference>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

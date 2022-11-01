@@ -2,6 +2,9 @@
 {
     public class Product
     {
+        public Product()
+        { }
+
         public Product(int id, string name, int price)
         {
             Id = id;

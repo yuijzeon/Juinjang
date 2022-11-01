@@ -1,6 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System.Linq;
+using NUnit.Framework;
 using ProductPrice.Database;
-using ProductPrice.Database.Entity;
 
 namespace ProductPrice.UnitTests
 {
@@ -10,10 +10,10 @@ namespace ProductPrice.UnitTests
         [Test]
         public void Insert()
         {
-            var toDb = new Product
+            var toDb = new ProductEntity
             {
-                Id = 1,
-                Name = "Yellow Duck",
+                Id = 3,
+                Name = "Black Duck",
                 Price = 1000
             };
 
@@ -22,6 +22,15 @@ namespace ProductPrice.UnitTests
                 db.Products.Add(toDb);
                 var count = db.SaveChanges();
                 Assert.AreEqual(1, count);
+            }
+        }
+
+        [Test]
+        public void Select()
+        {
+            using (var db = new JuinjangContext())
+            {
+                var productEntities = db.Products.AsEnumerable();
             }
         }
     }
