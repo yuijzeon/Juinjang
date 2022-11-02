@@ -104,5 +104,19 @@ namespace ProductPrice
                     break;
             }
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var saveDialog = new SaveFileDialog 
+            {
+                DefaultExt = "csv",
+                Filter = "csv文件|*.csv",
+                FileName = "export"
+            };
+            if (saveDialog.ShowDialog() != DialogResult.Cancel)
+            {
+            dataGridView.ExportDatagridToCsv(saveDialog.FileName, new[] { "Id", "Name", "Price" }, true);
+            }
+        }
     }
 }
