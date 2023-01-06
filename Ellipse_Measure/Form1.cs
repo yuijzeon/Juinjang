@@ -14,6 +14,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
 using Emgu.CV.Features2D;
+using Emgu.CV.Aruco;
 
 namespace Oval_Measure
 {
@@ -33,11 +34,16 @@ namespace Oval_Measure
         int[] ROI_X = new int[2];
         int[] ROI_Y = new int[2];
         string[] Sol_Text = new string[3];
-        
+
+        private KeyEnterAction NextKeyEnterAction { get; set; }
+        private SquareGrid SquareGrid { get; set; } = new SquareGrid();
+
         #region Form
         public Form1()
         {
             InitializeComponent();
+            SquareGrid.方形網格尺寸 = double.Parse(dTextBox.Text);
+            SquareGrid.沖頭半徑 = double.Parse(pradTextBox.Text);
         }
 
         private void Form1_Load(object sender, EventArgs e) //載入；顯示語言中文or英文取決於語言的選擇
@@ -61,7 +67,7 @@ namespace Oval_Measure
                 LongTextBox.Text = "長軸:";
                 ShortTextBox.Text = "短軸:";
                 AngleTextBox.Text = "角度:";
-                
+
                 chineseToolStripMenuItem1.Checked = true; //當chineseTool成立時將介面更改為中文
             }
             else
@@ -101,7 +107,7 @@ namespace Oval_Measure
                 input_Image = new Image<Bgr, byte>(filename.FileName);
                 pictureBox1.Image = input_Image.ToBitmap();
                 sizeTextBox.Text = "Size: " + pictureBox1.Image.Size.Width.ToString() + ", " + pictureBox1.Image.Size.Height.ToString();
-                
+
                 //sizeTextBox.Text = size[0].ToString("f3");
             }
             if (input_Image != null)
@@ -122,7 +128,7 @@ namespace Oval_Measure
 
         #endregion
 
-        
+
 
         private void pictureBox1_MouseCaptureChanged(object sender, EventArgs e)
         {//針對滑鼠游標的捕捉來撰寫判斷式
@@ -135,7 +141,7 @@ namespace Oval_Measure
                 ContoursPoint();
                 measureToolStripMenuItem.Checked = false;  //將量測功能設為不可使用
             }
-             
+
         }
 
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
@@ -145,7 +151,7 @@ namespace Oval_Measure
             ROI_Y[0] = e.Y;
             if (b_ROI == true)
             {
-                r_ROI.X = ROI_X.Min(); 
+                r_ROI.X = ROI_X.Min();
                 r_ROI.Width = ROI_X.Max() - r_ROI.X;//X方向最大值減最小值可得到寬
                 r_ROI.Y = ROI_Y.Min();
                 r_ROI.Height = ROI_Y.Max() - r_ROI.Y;//Y方向最大值減最小值可得到高
@@ -155,7 +161,7 @@ namespace Oval_Measure
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            if (settingReferencePointToolStripMenuItem.Checked == true) //針對校正功能的MouseDown
+            if (settingReferencePointToolStripMenuItem.Checked == true || NextKeyEnterAction != KeyEnterAction.Unknown) //針對校正功能的MouseDown
             {
                 Crosshair.X = e.X; //校正時的十字線
                 Crosshair.Y = e.Y;
@@ -173,14 +179,16 @@ namespace Oval_Measure
         #region DrawImage
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
+            SquareGrid.PaintOn(e.Graphics);
+
             if (b_ROI == true) //當此判斷式成立時將ROI(橢圓)以紅線選取
             {
                 e.Graphics.DrawRectangle(new Pen(Brushes.Red, 2.0f), r_ROI);
             }
             if (b_ReferencePoint == true) //當此判斷式成立時顯示紅色叉叉(用於校正)
             {
-                e.Graphics.DrawLine(new Pen(Brushes.Red, 2.0f), Crosshair.X-5, Crosshair.Y - 5, Crosshair.X+5, Crosshair.Y + 5);
-                e.Graphics.DrawLine(new Pen(Brushes.Red, 2.0f), Crosshair.X -5, Crosshair.Y+5, Crosshair.X + 5, Crosshair.Y-5);
+                e.Graphics.DrawLine(new Pen(Brushes.Red, 2.0f), Crosshair.X - 5, Crosshair.Y - 5, Crosshair.X + 5, Crosshair.Y + 5);
+                e.Graphics.DrawLine(new Pen(Brushes.Red, 2.0f), Crosshair.X - 5, Crosshair.Y + 5, Crosshair.X + 5, Crosshair.Y - 5);
             }
         }
 
@@ -193,7 +201,7 @@ namespace Oval_Measure
             VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint();
             //External - 只提取最外層的輪廓
             //ChainApproxNone - 將所有點轉為點[]
-            CvInvoke.FindContours(input_Image.Canny(128,256), contours, null, RetrType.Tree, ChainApproxMethod.ChainApproxNone);//提取輪廓
+            CvInvoke.FindContours(input_Image.Canny(128, 256), contours, null, RetrType.Tree, ChainApproxMethod.ChainApproxNone);//提取輪廓
             Point[][] P_contours = contours.ToArrayOfArray();//[contours.Size][0]
             double[] Sol_out = new double[5];
             double[] Sol_in = new double[5];
@@ -217,7 +225,7 @@ namespace Oval_Measure
             }
             double RTD = 180.0f / Math.PI; //角度計算
             double[] Sol = new double[5]; //實體化陣列
-            for(int i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
                 Sol[i] = (Sol_out[i] + Sol_in[i]) / 2; //因線粗關係，將橢圓外圈和內圈平均 使結果更趨近於現實
             }
@@ -228,64 +236,77 @@ namespace Oval_Measure
         }
 
 
-        
+
         #endregion
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (b_ReferencePoint == true) //設定原點 之後將X和Y的長度存入size[0]和size[1]中
             {
-                if(e.KeyData == Keys.Up)
+                if (e.KeyData == Keys.Up)
                 {
                     Crosshair.Y -= 1;
                 }
-                if(e.KeyData == Keys.Down)
+                if (e.KeyData == Keys.Down)
                 {
                     Crosshair.Y += 1;
                 }
-                if(e.KeyData == Keys.Right)
+                if (e.KeyData == Keys.Right)
                 {
                     Crosshair.X += 1;
                 }
-                if(e.KeyData == Keys.Left)
+                if (e.KeyData == Keys.Left)
                 {
                     Crosshair.X -= 1;
                 }
                 if (e.KeyData == Keys.Enter)
                 {
-                    b_ReferencePoint = false;
-                    P_ReferencePoint[i_ReferencePoint].X = Crosshair.X;
-                    P_ReferencePoint[i_ReferencePoint].Y = Crosshair.Y;
-                    i_ReferencePoint++;
-                    if (i_ReferencePoint == 1) //設定原點
+                    switch (NextKeyEnterAction)
                     {
-                        MessageBox.Show("請設定X軸");
+                        case KeyEnterAction.SetSquareGridPoint:
+                            SquareGrid.Points.Add(new Point(Crosshair.X, Crosshair.Y));                            break;
+                        default:
+                            原本KeyEnter的動作();
+                            break;
                     }
-                    if (i_ReferencePoint == 2) //設定X軸
-                    {
-                        public_Form2.public_Text = "請輸入X軸長度";
-                        new Form2().ShowDialog();//輸入長度(中斷)
-                        MessageBox.Show("X軸長度" + public_Form2.public_Return + "mm"); //顯示X軸長度
-                        size[0] = Convert.ToDouble(public_Form2.public_Return) / Math.Sqrt(((P_ReferencePoint[1].X - P_ReferencePoint[0].X) * (P_ReferencePoint[1].X - P_ReferencePoint[0].X)) + ((P_ReferencePoint[1].Y - P_ReferencePoint[0].Y) * (P_ReferencePoint[1].Y - P_ReferencePoint[0].Y)))*2;
-                        Console.Write(size[0] + ",");    //↑定義陣列內容並執行點位的運算
-                        MessageBox.Show("請設定Y軸");
-                    }
-                    if (i_ReferencePoint >= 3) //設定Y軸
-                    {
-                        public_Form2.public_Text = "請輸入Y軸長度";
-                        new Form2().ShowDialog();//輸入長度(中斷)
-                        MessageBox.Show("Y軸長度" + public_Form2.public_Return + "mm"); //顯示Y軸長度
-                        size[1] = Convert.ToDouble(public_Form2.public_Return) / Math.Sqrt(((P_ReferencePoint[0].X - P_ReferencePoint[2].X) * (P_ReferencePoint[0].X - P_ReferencePoint[2].X)) + ((P_ReferencePoint[0].Y - P_ReferencePoint[2].Y) * (P_ReferencePoint[0].Y - P_ReferencePoint[2].Y)))*2;
-                        settingReferencePointToolStripMenuItem.Checked = false;   //↑定義陣列內容並執行點位的運算
-                        Console.WriteLine(P_ReferencePoint[0]);
-                        Console.WriteLine(P_ReferencePoint[1]);
-                        Console.WriteLine(P_ReferencePoint[2]);
-                        MessageBox.Show("參考點設定完成");
-                        ReferencePointTextBox.Text = size[0].ToString("f3") + "," + size[1].ToString("f3"); //回傳size陣列的字串
-                        measureToolStripMenuItem.Enabled = true;
-                    }
+                    pictureBox1.Refresh();   //刷新pictureBox1
                 }
                 pictureBox1.Refresh();
+            }
+        }
+
+        private void 原本KeyEnter的動作()
+        {
+            b_ReferencePoint = false;
+            P_ReferencePoint[i_ReferencePoint].X = Crosshair.X;
+            P_ReferencePoint[i_ReferencePoint].Y = Crosshair.Y;
+            i_ReferencePoint++;
+            if (i_ReferencePoint == 1) //設定原點
+            {
+                MessageBox.Show("請設定X軸");
+            }
+            if (i_ReferencePoint == 2) //設定X軸
+            {
+                public_Form2.public_Text = "請輸入X軸長度";
+                new Form2().ShowDialog();//輸入長度(中斷)
+                MessageBox.Show("X軸長度" + public_Form2.public_Return + "mm"); //顯示X軸長度
+                size[0] = Convert.ToDouble(public_Form2.public_Return) / Math.Sqrt(((P_ReferencePoint[1].X - P_ReferencePoint[0].X) * (P_ReferencePoint[1].X - P_ReferencePoint[0].X)) + ((P_ReferencePoint[1].Y - P_ReferencePoint[0].Y) * (P_ReferencePoint[1].Y - P_ReferencePoint[0].Y))) * 2;
+                Console.Write(size[0] + ",");    //↑定義陣列內容並執行點位的運算
+                MessageBox.Show("請設定Y軸");
+            }
+            if (i_ReferencePoint >= 3) //設定Y軸
+            {
+                public_Form2.public_Text = "請輸入Y軸長度";
+                new Form2().ShowDialog();//輸入長度(中斷)
+                MessageBox.Show("Y軸長度" + public_Form2.public_Return + "mm"); //顯示Y軸長度
+                size[1] = Convert.ToDouble(public_Form2.public_Return) / Math.Sqrt(((P_ReferencePoint[0].X - P_ReferencePoint[2].X) * (P_ReferencePoint[0].X - P_ReferencePoint[2].X)) + ((P_ReferencePoint[0].Y - P_ReferencePoint[2].Y) * (P_ReferencePoint[0].Y - P_ReferencePoint[2].Y))) * 2;
+                settingReferencePointToolStripMenuItem.Checked = false;   //↑定義陣列內容並執行點位的運算
+                Console.WriteLine(P_ReferencePoint[0]);
+                Console.WriteLine(P_ReferencePoint[1]);
+                Console.WriteLine(P_ReferencePoint[2]);
+                MessageBox.Show("參考點設定完成");
+                ReferencePointTextBox.Text = size[0].ToString("f3") + "," + size[1].ToString("f3"); //回傳size陣列的字串
+                measureToolStripMenuItem.Enabled = true;
             }
         }
 
@@ -320,5 +341,129 @@ namespace Oval_Measure
         {
 
         }
+
+        private void measureSquareGridToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("請輸入4個點");
+            NextKeyEnterAction = KeyEnterAction.SetSquareGridPoint;
+        }
+
+        private void endMeasureSquarePointSettingToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dTextBox_TextChanged(object sender, EventArgs e)
+        {
+            var dTextBox = sender as ToolStripTextBox;
+
+            if (double.TryParse(dTextBox.Text, out var d))
+            {
+                SquareGrid.方形網格尺寸 = d;
+            }
+            else
+            {
+                dTextBox.Text = SquareGrid.方形網格尺寸.ToString();
+            }
+        }
+
+        private void pradTextBox_TextChanged(object sender, EventArgs e)
+        {
+            var pradTextBox = sender as ToolStripTextBox;
+
+            if (double.TryParse(pradTextBox.Text, out var prad))
+            {
+                SquareGrid.沖頭半徑 = prad;
+            }
+            else
+            {
+                pradTextBox.Text = SquareGrid.沖頭半徑.ToString();
+            }
+        }
+
+        private void resetSquareGridMenuItem_Click(object sender, EventArgs e)
+        {
+            SquareGrid.ResetPoints();
+            pictureBox1.Refresh();
+        }
+
+        private void calculateEpsoolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            NextKeyEnterAction = KeyEnterAction.Unknown;
+            putEpsValueToLabel();
+        }
+
+        private void putEpsValueToLabel()
+        {
+            var info = "";
+
+            for (int i = 0; i < SquareGrid.Points.Count; i++)
+            {
+                info += "x:" + SquareGrid.Points[i].X + ", ";
+                info += "y:" + SquareGrid.Points[i].X + ", ";
+                info += "eps1:" + SquareGrid.Eps[i].Item1 + ", ";
+                info += "eps2:" + SquareGrid.Eps[i].Item2 + "\n";
+            }
+
+            MessageBox.Show(info);
+        }
+    }
+
+    internal class SquareGrid
+    {
+        public List<Point> Points { get; set; } = new List<Point>();
+        public double 沖頭半徑 { get; set; }
+        public double 方形網格尺寸 { get; set; }
+        public List<(double, double)> Eps
+        {
+            get
+            {
+                var valueTuples = new List<(double, double)>();
+
+                for (var i = 0; i < Points.Count; i++)
+                {
+                    var pointA = i > 0 ? Points[i - 1] : Points[Points.Count - 1];
+                    var pointB = i < Points.Count - 1 ? Points[i + 1] : Points[0];
+                    valueTuples.Add(CalculateEps(Points[i], pointA, pointB));
+                }
+
+                return valueTuples;
+            }
+        }
+
+        internal void ResetPoints()
+        {
+            Points.Clear();
+        }
+
+        private (double, double) CalculateEps(Point point, Point a, Point b)
+        {
+            var deltaXa = a.X - point.X;
+            var deltaYa = a.Y - point.Y;
+            var deltaXb = b.X - point.X;
+            var deltaYb = b.Y - point.Y;
+            var d = Math.Sin(方形網格尺寸 / 2.0 / 沖頭半徑) * 沖頭半徑 * 2;
+            var e11 = (Math.Pow(deltaXa, 2) + Math.Pow(deltaYa, 2) - Math.Pow(d, 2)) / (2 * Math.Pow(d, 2));
+            var e22 = (Math.Pow(deltaXb, 2) + Math.Pow(deltaYb, 2) - Math.Pow(d, 2)) / (2 * Math.Pow(d, 2));
+            var e12 = ((deltaXa * deltaXb) + (deltaYa * deltaYb)) / (2 * Math.Pow(d, 2));
+
+            return (Math.Log(Math.Sqrt(1 + 2 * (e11 + e22) / 2 + Math.Sqrt(Math.Pow((e11 - e22) / 2, 2) + Math.Pow(e12, 2)))),
+                Math.Log(Math.Sqrt(1 + 2 * (e11 + e22) / 2 - Math.Sqrt(Math.Pow((e11 - e22) / 2, 2) + Math.Pow(e12, 2)))));
+        }
+
+        internal void PaintOn(Graphics graphics)
+        {
+            foreach (var point in Points)
+            {
+                graphics.DrawLine(new Pen(Brushes.Green, 2.0f), point.X - 5, point.Y - 5, point.X + 5, point.Y + 5);
+                graphics.DrawLine(new Pen(Brushes.Green, 2.0f), point.X - 5, point.Y + 5, point.X + 5, point.Y - 5);
+            }
+        }
+    }
+
+    internal enum KeyEnterAction
+    {
+        Unknown,
+        SetSquareGridPoint
     }
 }
