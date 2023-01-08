@@ -15,6 +15,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
 using Emgu.CV.Features2D;
 using Emgu.CV.Aruco;
+using ZedGraph;
 
 namespace Oval_Measure
 {
@@ -25,25 +26,24 @@ namespace Oval_Measure
         Image<Gray, byte> grayImage;
         Rectangle r_ROI = new Rectangle();
         Point Crosshair = new Point();
-        Point[] P_ReferencePoint = new Point[3];
-        int i_ReferencePoint = 0;
         bool b_ROI = new bool();
         bool b_ReferencePoint = new bool();
-        bool[] b_function = new bool[2];
-        double[] size = new double[2];
         int[] ROI_X = new int[2];
         int[] ROI_Y = new int[2];
         string[] Sol_Text = new string[3];
 
         private KeyEnterAction NextKeyEnterAction { get; set; }
-        private SquareGrid SquareGrid { get; set; } = new SquareGrid();
+        private ReferenceSetting ReferenceSetting { get; set; }
+        private SquareGrid SquareGrid { get; set; }
 
         #region Form
         public Form1()
         {
             InitializeComponent();
-            SquareGrid.方形網格尺寸 = float.Parse(dTextBox.Text);
-            SquareGrid.沖頭半徑 = float.Parse(pradTextBox.Text);
+            ReferenceSetting = new ReferenceSetting();
+            SquareGrid = new SquareGrid(ReferenceSetting);
+            SquareGrid.方形網格尺寸 = double.Parse(dTextBox.Text);
+            SquareGrid.沖頭半徑 = double.Parse(pradTextBox.Text);
         }
 
         private void Form1_Load(object sender, EventArgs e) //載入；顯示語言中文or英文取決於語言的選擇
@@ -121,8 +121,8 @@ namespace Oval_Measure
             if (settingReferencePointToolStripMenuItem.Checked == false) //如判斷出尚未校正 則進入校正階段
             {
                 settingReferencePointToolStripMenuItem.Checked = true;
-                i_ReferencePoint = 0; //X和Y設定完的交點設為原點
                 MessageBox.Show("請設定原點");
+                NextKeyEnterAction = KeyEnterAction.SetReferenceOrigin;
             }
         }
 
@@ -230,8 +230,8 @@ namespace Oval_Measure
                 Sol[i] = (Sol_out[i] + Sol_in[i]) / 2; //因線粗關係，將橢圓外圈和內圈平均 使結果更趨近於現實
             }
             double[] rol = { Math.Cos(Sol[4]), -Math.Sin(Sol[4]), Math.Sin(Sol[4]), Math.Cos(Sol[4]) };
-            LongTextBox.Text = Sol_Text[0] + " " + (Sol[2] * size[0]).ToString("f3"); //定義長軸
-            ShortTextBox.Text = Sol_Text[1] + " " + (Sol[3] * size[1]).ToString("f3"); //定義短軸
+            LongTextBox.Text = Sol_Text[0] + " " + (Sol[2] * ReferenceSetting.XScale).ToString("f3"); //定義長軸
+            ShortTextBox.Text = Sol_Text[1] + " " + (Sol[3] * ReferenceSetting.YScale).ToString("f3"); //定義短軸
             AngleTextBox.Text = Sol_Text[2] + " " + (-Sol[4] * RTD).ToString("f3");    //定義角度
         }
 
@@ -263,50 +263,50 @@ namespace Oval_Measure
                 {
                     switch (NextKeyEnterAction)
                     {
-                        case KeyEnterAction.SetSquareGridPoint:
-                            SquareGrid.Points.Add(new Point(Crosshair.X, Crosshair.Y));                            break;
-                        default:
-                            原本KeyEnter的動作();
+                        case KeyEnterAction.SetReferenceOrigin:
+                            ReferenceSetting.Origin = new Point(Crosshair.X, Crosshair.Y);
+                            
+                            MessageBox.Show("請設定X軸");
+                            NextKeyEnterAction = KeyEnterAction.SetReferenceXRefer;
+                            break;
+                        
+                        case KeyEnterAction.SetReferenceXRefer:
+                            ReferenceSetting.XRefer = new Point(Crosshair.X, Crosshair.Y);
+                            
+                            var xLengthForm = new Form2("請輸入X軸長度");//輸入長度(中斷)
+                            xLengthForm.ShowDialog();
+                            MessageBox.Show("X軸長度" + xLengthForm.Value + "mm"); //顯示X軸長度
+                            ReferenceSetting.XScale = xLengthForm.Value / PointHelper.Distance(ReferenceSetting.XRefer, ReferenceSetting.Origin) * 2;
+                            
+                            MessageBox.Show("請設定Y軸"); //↑定義陣列內容並執行點位的運算
+                            NextKeyEnterAction = KeyEnterAction.SetReferenceYRefer;
+                            break;
+                        
+                        case KeyEnterAction.SetReferenceYRefer:
+                            ReferenceSetting.YRefer = new Point(Crosshair.X, Crosshair.Y);
+                            
+                            var yLengthForm = new Form2("請輸入Y軸長度");//輸入長度(中斷)
+                            yLengthForm.ShowDialog();
+                            MessageBox.Show("Y軸長度" + yLengthForm.Value + "mm"); //顯示X軸長度
+                            ReferenceSetting.YScale = yLengthForm.Value / PointHelper.Distance(ReferenceSetting.YRefer, ReferenceSetting.Origin) * 2;
+                            
+                            
+                            MessageBox.Show("參考點設定完成"); //↑定義陣列內容並執行點位的運算
+                            ReferencePointTextBox.Text = ReferenceSetting.XScale.ToString("f3") + "," + ReferenceSetting.YScale.ToString("f3"); //回傳size陣列的字串
+                            
+                            settingReferencePointToolStripMenuItem.Checked = false;
+                            measureToolStripMenuItem.Enabled = true;
+
+                            NextKeyEnterAction = KeyEnterAction.Unknown;
+                            break;
+                        
+                        case KeyEnterAction.SetSquareGridPoints:
+                            SquareGrid.RawPoints.Add(new Point(Crosshair.X, Crosshair.Y));
                             break;
                     }
                     pictureBox1.Refresh();   //刷新pictureBox1
                 }
                 pictureBox1.Refresh();
-            }
-        }
-
-        private void 原本KeyEnter的動作()
-        {
-            b_ReferencePoint = false;
-            P_ReferencePoint[i_ReferencePoint].X = Crosshair.X;
-            P_ReferencePoint[i_ReferencePoint].Y = Crosshair.Y;
-            i_ReferencePoint++;
-            if (i_ReferencePoint == 1) //設定原點
-            {
-                MessageBox.Show("請設定X軸");
-            }
-            if (i_ReferencePoint == 2) //設定X軸
-            {
-                public_Form2.public_Text = "請輸入X軸長度";
-                new Form2().ShowDialog();//輸入長度(中斷)
-                MessageBox.Show("X軸長度" + public_Form2.public_Return + "mm"); //顯示X軸長度
-                size[0] = Convert.ToDouble(public_Form2.public_Return) / Math.Sqrt(((P_ReferencePoint[1].X - P_ReferencePoint[0].X) * (P_ReferencePoint[1].X - P_ReferencePoint[0].X)) + ((P_ReferencePoint[1].Y - P_ReferencePoint[0].Y) * (P_ReferencePoint[1].Y - P_ReferencePoint[0].Y))) * 2;
-                Console.Write(size[0] + ",");    //↑定義陣列內容並執行點位的運算
-                MessageBox.Show("請設定Y軸");
-            }
-            if (i_ReferencePoint >= 3) //設定Y軸
-            {
-                public_Form2.public_Text = "請輸入Y軸長度";
-                new Form2().ShowDialog();//輸入長度(中斷)
-                MessageBox.Show("Y軸長度" + public_Form2.public_Return + "mm"); //顯示Y軸長度
-                size[1] = Convert.ToDouble(public_Form2.public_Return) / Math.Sqrt(((P_ReferencePoint[0].X - P_ReferencePoint[2].X) * (P_ReferencePoint[0].X - P_ReferencePoint[2].X)) + ((P_ReferencePoint[0].Y - P_ReferencePoint[2].Y) * (P_ReferencePoint[0].Y - P_ReferencePoint[2].Y))) * 2;
-                settingReferencePointToolStripMenuItem.Checked = false;   //↑定義陣列內容並執行點位的運算
-                Console.WriteLine(P_ReferencePoint[0]);
-                Console.WriteLine(P_ReferencePoint[1]);
-                Console.WriteLine(P_ReferencePoint[2]);
-                MessageBox.Show("參考點設定完成");
-                ReferencePointTextBox.Text = size[0].ToString("f3") + "," + size[1].ToString("f3"); //回傳size陣列的字串
-                measureToolStripMenuItem.Enabled = true;
             }
         }
 
@@ -345,7 +345,7 @@ namespace Oval_Measure
         private void measureSquareGridToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("請輸入4個點");
-            NextKeyEnterAction = KeyEnterAction.SetSquareGridPoint;
+            NextKeyEnterAction = KeyEnterAction.SetSquareGridPoints;
         }
 
         private void endMeasureSquarePointSettingToolStripMenuItem_Click(object sender, EventArgs e)
@@ -357,7 +357,7 @@ namespace Oval_Measure
         {
             var dTextBox = sender as ToolStripTextBox;
 
-            if (float.TryParse(dTextBox.Text, out var d))
+            if (double.TryParse(dTextBox.Text, out var d))
             {
                 SquareGrid.方形網格尺寸 = d;
             }
@@ -369,7 +369,7 @@ namespace Oval_Measure
 
         private void pradTextBox_TextChanged(object sender, EventArgs e)
         {
-            if (float.TryParse(pradTextBox.Text, out var prad))
+            if (double.TryParse(pradTextBox.Text, out var prad))
             {
                 SquareGrid.沖頭半徑 = prad;
             }
@@ -388,17 +388,17 @@ namespace Oval_Measure
         private void calculateEpsoolStripMenuItem_Click(object sender, EventArgs e)
         {
             NextKeyEnterAction = KeyEnterAction.Unknown;
-            putEpsValueToLabel();
+            PutEpsValueToLabel();
         }
 
-        private void putEpsValueToLabel()
+        private void PutEpsValueToLabel()
         {
             var info = "";
 
-            for (int i = 0; i < SquareGrid.Points.Count; i++)
+            for (int i = 0; i < SquareGrid.RawPoints.Count; i++)
             {
-                info += "x:" + SquareGrid.Points[i].X + ", ";
-                info += "y:" + SquareGrid.Points[i].X + ", ";
+                info += "x:" + SquareGrid.RefPoints[i].X + ", ";
+                info += "y:" + SquareGrid.RefPoints[i].Y + ", ";
                 info += "eps1:" + SquareGrid.Eps[i].Item1 + ", ";
                 info += "eps2:" + SquareGrid.Eps[i].Item2 + "\n";
             }
@@ -409,16 +409,18 @@ namespace Oval_Measure
 
     internal class ReferenceSetting
     {
+        public bool IsChecked { get; set; } = false;
         public Point Origin { get; set; }
         public Point XRefer { get; set; }
-        public float XScale { get; set; }
+        public double XScale { get; set; }
         public Point YRefer { get; set; }
-        public float YScale { get; set; }
+        public double YScale { get; set; }
 
-        public PointF Convert(Point image)
+        public PointD Convert(Point raw)
         {
-            var delta = Origin.X * XRefer.Y + XRefer.X * YRefer.Y + YRefer.X * Origin.Y
-                        - (YRefer.X * XRefer.Y + Origin.X * YRefer.Y + XRefer.X * Origin.Y);
+            var delta = (double)(Origin.X * XRefer.Y + XRefer.X * YRefer.Y + YRefer.X * Origin.Y
+                                 - (YRefer.X * XRefer.Y + Origin.X * YRefer.Y + XRefer.X * Origin.Y)) / 225;
+            
             var aa = (YRefer.Y - Origin.Y) / delta;
             var bb = (Origin.X - YRefer.X) / delta;
             var cc = (YRefer.X * Origin.Y - Origin.X * YRefer.Y) / delta;
@@ -426,30 +428,38 @@ namespace Oval_Measure
             var ee = (XRefer.X - Origin.X) / delta;
             var ff = (Origin.X * XRefer.Y - XRefer.X * Origin.Y) / delta;
             
-            return new PointF
+            return new PointD
             {
-                X = XScale * (aa * image.X + bb * image.Y + cc),
-                Y = YScale * (dd * image.X + ee * image.Y + ff)
+                X = XScale * (aa * raw.X + bb * raw.Y + cc),
+                Y = YScale * (dd * raw.X + ee * raw.Y + ff)
             };
         }
     }
 
     internal class SquareGrid
     {
-        public List<PointF> Points { get; set; } = new List<PointF>();
-        public float 沖頭半徑 { get; set; }
-        public float 方形網格尺寸 { get; set; }
+        public SquareGrid(ReferenceSetting referenceSetting)
+        {
+            ReferenceSetting = referenceSetting;
+        }
+
+        private ReferenceSetting ReferenceSetting { get; set; }
+        public List<Point> RawPoints { get; set; } = new List<Point>();
+        public List<PointD> RefPoints => RawPoints.Select(p => ReferenceSetting.Convert(p)).ToList();
+        
+        public double 沖頭半徑 { get; set; }
+        public double 方形網格尺寸 { get; set; }
         public List<(double, double)> Eps
         {
             get
             {
                 var valueTuples = new List<(double, double)>();
 
-                for (var i = 0; i < Points.Count; i++)
+                for (var i = 0; i < RefPoints.Count; i++)
                 {
-                    var pointA = i > 0 ? Points[i - 1] : Points[Points.Count - 1];
-                    var pointB = i < Points.Count - 1 ? Points[i + 1] : Points[0];
-                    valueTuples.Add(CalculateEps(Points[i], pointA, pointB));
+                    var pointA = i > 0 ? RefPoints[i - 1] : RefPoints[RefPoints.Count - 1];
+                    var pointB = i < RefPoints.Count - 1 ? RefPoints[i + 1] : RefPoints[0];
+                    valueTuples.Add(CalculateEps(RefPoints[i], pointA, pointB));
                 }
 
                 return valueTuples;
@@ -458,10 +468,10 @@ namespace Oval_Measure
 
         internal void ResetPoints()
         {
-            Points.Clear();
+            RawPoints.Clear();
         }
 
-        private (double, double) CalculateEps(PointF point, PointF a, PointF b)
+        private (double, double) CalculateEps(PointD point, PointD a, PointD b)
         {
             var deltaXa = a.X - point.X;
             var deltaYa = a.Y - point.Y;
@@ -478,10 +488,10 @@ namespace Oval_Measure
 
         internal void PaintOn(Graphics graphics)
         {
-            foreach (var point in Points)
+            foreach (var point in RawPoints)
             {
-                graphics.DrawLine(new Pen(Brushes.Green, 2.0f), point.X - 5, point.Y - 5, point.X + 5, point.Y + 5);
-                graphics.DrawLine(new Pen(Brushes.Green, 2.0f), point.X - 5, point.Y + 5, point.X + 5, point.Y - 5);
+                graphics.DrawLine(new Pen(Brushes.Green, 2.0f), (float)point.X - 5, (float)point.Y - 5, (float)point.X + 5, (float)point.Y + 5);
+                graphics.DrawLine(new Pen(Brushes.Green, 2.0f), (float)point.X - 5, (float)point.Y + 5, (float)point.X + 5, (float)point.Y - 5);
             }
         }
     }
@@ -489,6 +499,9 @@ namespace Oval_Measure
     internal enum KeyEnterAction
     {
         Unknown,
-        SetSquareGridPoint
+        SetReferenceOrigin,
+        SetReferenceXRefer,
+        SetReferenceYRefer,
+        SetSquareGridPoints
     }
 }

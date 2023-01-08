@@ -12,27 +12,26 @@ namespace Oval_Measure
 {
     public partial class Form2 : Form
     {
-        public Form2()
+        public int Value { get; set; }
+
+        public Form2(string text = null)
         {
             InitializeComponent();
+            label1.Text = text ?? public_Form2.public_Text;
         }
 
-        private void Form2_Load(object sender, EventArgs e)
-        {
-            label1.Text = public_Form2.public_Text;
-        }
+        // private void Form2_Load(object sender, EventArgs e)
+        // {
+        //     label1.Text = public_Form2.public_Text;
+        // }
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyData == Keys.Enter)
+            if (e.KeyData == Keys.Enter && int.TryParse(textBox1.Text, out var value))
             {
-                if (textBox1.Text.Length > 0)
-                {
-                    public_Form2.public_Return = textBox1.Text;
-                }
-                this.Close();
+                Value = value;
+                Close();
             }
-            
         }
     }
 }
