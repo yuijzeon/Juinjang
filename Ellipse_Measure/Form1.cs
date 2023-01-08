@@ -42,8 +42,8 @@ namespace Oval_Measure
         public Form1()
         {
             InitializeComponent();
-            SquareGrid.方形網格尺寸 = double.Parse(dTextBox.Text);
-            SquareGrid.沖頭半徑 = double.Parse(pradTextBox.Text);
+            SquareGrid.方形網格尺寸 = float.Parse(dTextBox.Text);
+            SquareGrid.沖頭半徑 = float.Parse(pradTextBox.Text);
         }
 
         private void Form1_Load(object sender, EventArgs e) //載入；顯示語言中文or英文取決於語言的選擇
@@ -357,7 +357,7 @@ namespace Oval_Measure
         {
             var dTextBox = sender as ToolStripTextBox;
 
-            if (double.TryParse(dTextBox.Text, out var d))
+            if (float.TryParse(dTextBox.Text, out var d))
             {
                 SquareGrid.方形網格尺寸 = d;
             }
@@ -369,9 +369,7 @@ namespace Oval_Measure
 
         private void pradTextBox_TextChanged(object sender, EventArgs e)
         {
-            var pradTextBox = sender as ToolStripTextBox;
-
-            if (double.TryParse(pradTextBox.Text, out var prad))
+            if (float.TryParse(pradTextBox.Text, out var prad))
             {
                 SquareGrid.沖頭半徑 = prad;
             }
@@ -409,11 +407,38 @@ namespace Oval_Measure
         }
     }
 
+    internal class ReferenceSetting
+    {
+        public Point Origin { get; set; }
+        public Point XRefer { get; set; }
+        public float XScale { get; set; }
+        public Point YRefer { get; set; }
+        public float YScale { get; set; }
+
+        public PointF Convert(Point image)
+        {
+            var delta = Origin.X * XRefer.Y + XRefer.X * YRefer.Y + YRefer.X * Origin.Y
+                        - (YRefer.X * XRefer.Y + Origin.X * YRefer.Y + XRefer.X * Origin.Y);
+            var aa = (YRefer.Y - Origin.Y) / delta;
+            var bb = (Origin.X - YRefer.X) / delta;
+            var cc = (YRefer.X * Origin.Y - Origin.X * YRefer.Y) / delta;
+            var dd = (Origin.Y - XRefer.Y) / delta;
+            var ee = (XRefer.X - Origin.X) / delta;
+            var ff = (Origin.X * XRefer.Y - XRefer.X * Origin.Y) / delta;
+            
+            return new PointF
+            {
+                X = XScale * (aa * image.X + bb * image.Y + cc),
+                Y = YScale * (dd * image.X + ee * image.Y + ff)
+            };
+        }
+    }
+
     internal class SquareGrid
     {
-        public List<Point> Points { get; set; } = new List<Point>();
-        public double 沖頭半徑 { get; set; }
-        public double 方形網格尺寸 { get; set; }
+        public List<PointF> Points { get; set; } = new List<PointF>();
+        public float 沖頭半徑 { get; set; }
+        public float 方形網格尺寸 { get; set; }
         public List<(double, double)> Eps
         {
             get
@@ -436,7 +461,7 @@ namespace Oval_Measure
             Points.Clear();
         }
 
-        private (double, double) CalculateEps(Point point, Point a, Point b)
+        private (double, double) CalculateEps(PointF point, PointF a, PointF b)
         {
             var deltaXa = a.X - point.X;
             var deltaYa = a.Y - point.Y;
